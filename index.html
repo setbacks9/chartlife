@@ -539,8 +539,14 @@ function buildTodayAdvice(transits, taspects, w){
     wealth: categoryAdvice(['木星','冥王星'],'財運'),
     health: categoryAdvice(['月亮','海王星'],'健康'),
     social: categoryAdvice(['水星','木星'],'人際'),
-    doList: doList.map(a=>`${a.transit} ${a.type} 本命${a.natal}`),
-    avoidList: avoidList.map(a=>`${a.transit} ${a.type} 本命${a.natal}`),
+    doList: doList.map(a=>{
+      const i=aspectInterp(a.transit,a.natal,a.type)||transitInterp(a.transit,a.type)||'';
+      return `<strong>${a.transit} ${a.type} 本命${a.natal}</strong>${i?'　'+i:''}`;
+    }),
+    avoidList: avoidList.map(a=>{
+      const i=aspectInterp(a.transit,a.natal,a.type)||transitInterp(a.transit,a.type)||'';
+      return `<strong>${a.transit} ${a.type} 本命${a.natal}</strong>${i?'　'+i:''}`;
+    }),
     luckyHint,
   };
 }
@@ -557,8 +563,8 @@ function renderTodayAdvice(adv){
       <div class="interp-block"><strong>♃ 人際</strong><div style="margin-top:6px">${adv.social}</div></div>
       <div class="interp-block"><strong>☉ 幸運時段</strong><div style="margin-top:6px">${escapeHtml(adv.luckyHint)}</div></div>
     </div>
-    ${adv.doList.length?`<div style="margin-top:14px"><div class="label">✓ 星辰祝福的事</div><ul class="advice">${adv.doList.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul></div>`:''}
-    ${adv.avoidList.length?`<div style="margin-top:10px"><div class="label">✗ 星辰提醒留意的事</div><ul class="advice">${adv.avoidList.map(t=>`<li class="warn">${escapeHtml(t)}</li>`).join('')}</ul></div>`:''}
+    ${adv.doList.length?`<div style="margin-top:14px"><div class="label">✓ 星辰祝福的事</div><ul class="advice">${adv.doList.map(t=>`<li>${t}</li>`).join('')}</ul></div>`:''}
+    ${adv.avoidList.length?`<div style="margin-top:10px"><div class="label">✗ 星辰提醒留意的事</div><ul class="advice">${adv.avoidList.map(t=>`<li class="warn">${t}</li>`).join('')}</ul></div>`:''}
   </div>`;
 }
 
