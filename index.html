@@ -678,11 +678,11 @@ function render(data,birthLabel,target){
     ${exactTaspects.length?`<div class="glass section">
       <h2>⚯ 今日天象 × 你本命 — 重要互動</h2>
       ${exactTaspects.map(a=>{
-        const interp=aspectInterp(a.transit,a.natal,a.type);
+        const interp=aspectInterp(a.transit,a.natal,a.type)||transitInterp(a.transit,a.type);
         return `<div class="interp-block">
           <strong>今日${escapeHtml(a.transit)} ${escapeHtml(a.type)} 本命${escapeHtml(a.natal)}</strong>
           <span style="opacity:.5;font-size:11px"> · ±${a.orb.toFixed(1)}°${a.exact?' <span class="badge exact">精準</span>':''}</span>
-          ${interp?`<div style="margin-top:4px">${escapeHtml(interp)}</div>`:''}</div>`;
+          ${interp?`<div style="margin-top:4px">${escapeHtml(interp)}</div>`:'<div style="margin-top:4px;opacity:.5">這對天象比較細微，留意就好。</div>'}</div>`;
       }).join('')}</div>`:''}
 
     <button class="btn secondary" id="resetBtn" style="margin-top:20px">✦ 重新查詢</button>
