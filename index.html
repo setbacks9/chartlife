@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>✦ 今日星盤運勢（本機版）</title>
+<title>✦ 今日星盤運勢</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
   @keyframes twinkle{0%,100%{opacity:.2;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
   @keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .container{width:100%;max-width:820px;margin:0 auto;position:relative;z-index:1}
+  .container{width:100%;max-width:860px;margin:0 auto;position:relative;z-index:1}
   .glass{background:var(--glass-bg);backdrop-filter:blur(12px);
     -webkit-backdrop-filter:blur(12px); border:1px solid var(--glass-border);
     border-radius:16px;padding:28px}
@@ -68,29 +68,30 @@
   .report{animation:fadeInUp .6s ease}
   .report-header{text-align:center;margin-bottom:20px}
   .report-header .birth-info{font-size:11px;opacity:.4;letter-spacing:.15em}
-  .report-header h1{font-size:22px;color:var(--gold-light);margin:4px 0}
+  .report-header h1{font-size:24px;color:var(--gold-light);margin:4px 0}
   .report-header .date{font-size:12px;opacity:.5}
   .section{margin-bottom:16px}
-  .section h2{font-size:14px;color:var(--gold-light);margin-bottom:10px;
+  .section h2{font-size:14px;color:var(--gold-light);margin-bottom:12px;
     display:flex;align-items:center;gap:8px;letter-spacing:.05em}
-  .grid{display:grid;gap:12px;grid-template-columns:1fr}
-  @media(min-width:600px){.grid{grid-template-columns:1fr 1fr}}
   table{width:100%;border-collapse:collapse;font-size:13px}
   th,td{padding:6px 8px;text-align:left;border-bottom:1px solid rgba(201,168,76,.12)}
   th{color:var(--gold-light);font-weight:600;letter-spacing:.05em;font-size:11px;text-transform:uppercase}
-  td.label-cell{color:var(--gold-light);width:80px;font-size:12px}
-  .badge{display:inline-block;padding:1px 6px;border-radius:4px;
-    background:rgba(201,168,76,.15);font-size:10px;margin-left:4px}
+  .badge{display:inline-block;padding:1px 6px;border-radius:4px;background:rgba(201,168,76,.15);font-size:10px;margin-left:4px}
   .badge.retro{background:rgba(220,120,80,.2);color:#ffc4a0}
+  .badge.exact{background:rgba(155,226,155,.2);color:#9be29b}
   ul.advice{list-style:none;padding:0;margin:0}
   ul.advice li{padding:10px 12px;margin-bottom:8px;border-left:3px solid var(--gold);
     background:rgba(201,168,76,.06);border-radius:0 8px 8px 0;font-size:14px;line-height:1.7}
-  .hl-good{color:#9be29b}
-  .hl-bad{color:#ffb4b4}
-  .summary-row{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid rgba(201,168,76,.1)}
+  ul.advice li.warn{border-left-color:#ffb4b4;background:rgba(220,80,80,.06)}
+  .summary-row{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid rgba(201,168,76,.1);gap:10px}
   .summary-row:last-child{border-bottom:none}
-  .summary-row .k{opacity:.6}
-  .summary-row .v{color:var(--gold-light);font-weight:600}
+  .summary-row .k{opacity:.6;flex-shrink:0}
+  .summary-row .v{color:var(--gold-light);font-weight:600;text-align:right}
+  .pill-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;background:rgba(201,168,76,.12);border:1px solid var(--glass-border)}
+  .interp-block{background:rgba(255,255,255,.03);padding:12px;border-radius:8px;margin-top:8px;font-size:13px;line-height:1.7;opacity:.9}
+  .interp-block strong{color:var(--gold-light)}
+  .chart-svg{display:block;margin:10px auto;max-width:100%;height:auto}
 </style>
 </head>
 <body>
@@ -126,7 +127,7 @@
 
     <div class="field">
       <label class="label">出生地</label>
-      <input type="text" id="place" placeholder="台北、東京、London…（內建常見城市）" />
+      <input type="text" id="place" placeholder="台北、東京、London…" />
     </div>
 
     <div class="field">
@@ -148,29 +149,152 @@
 </div>
 
 <script>
-const SHICHEN = [
-  ['子時（23:00-01:00）','00:00'],['丑時（01:00-03:00）','02:00'],
-  ['寅時（03:00-05:00）','04:00'],['卯時（05:00-07:00）','06:00'],
-  ['辰時（07:00-09:00）','08:00'],['巳時（09:00-11:00）','10:00'],
-  ['午時（11:00-13:00）','12:00'],['未時（13:00-15:00）','14:00'],
-  ['申時（15:00-17:00）','16:00'],['酉時（17:00-19:00）','18:00'],
-  ['戌時（19:00-21:00）','20:00'],['亥時（21:00-23:00）','22:00'],
-];
+const SHICHEN=[['子時（23:00-01:00）','00:00'],['丑時（01:00-03:00）','02:00'],['寅時（03:00-05:00）','04:00'],['卯時（05:00-07:00）','06:00'],['辰時（07:00-09:00）','08:00'],['巳時（09:00-11:00）','10:00'],['午時（11:00-13:00）','12:00'],['未時（13:00-15:00）','14:00'],['申時（15:00-17:00）','16:00'],['酉時（17:00-19:00）','18:00'],['戌時（19:00-21:00）','20:00'],['亥時（21:00-23:00）','22:00']];
+const SIGNS=['牡羊','金牛','雙子','巨蟹','獅子','處女','天秤','天蠍','射手','摩羯','水瓶','雙魚'];
+const ELEMENT={'牡羊':'火','獅子':'火','射手':'火','金牛':'土','處女':'土','摩羯':'土','雙子':'風','天秤':'風','水瓶':'風','巨蟹':'水','天蠍':'水','雙魚':'水'};
+const QUALITY={'牡羊':'本位','巨蟹':'本位','天秤':'本位','摩羯':'本位','金牛':'固定','獅子':'固定','天蠍':'固定','水瓶':'固定','雙子':'變動','處女':'變動','射手':'變動','雙魚':'變動'};
+const PLANET_SYMBOL={'太陽':'☉','月亮':'☽','水星':'☿','金星':'♀','火星':'♂','木星':'♃','土星':'♄','天王星':'♅','海王星':'♆','冥王星':'♇','北交點':'☊','南交點':'☋','上升':'AC','天頂':'MC'};
+const SIGN_SYMBOL={'牡羊':'♈','金牛':'♉','雙子':'♊','巨蟹':'♋','獅子':'♌','處女':'♍','天秤':'♎','天蠍':'♏','射手':'♐','摩羯':'♑','水瓶':'♒','雙魚':'♓'};
+
+const SUN_SIGN={
+  '牡羊':'你天生帶著拓荒者的衝勁 — 直接、無懼、想到就做。當你被「不要當第一個」綁住時，會明顯失去能量。',
+  '金牛':'你天生需要穩固與美感 — 重視可觸碰的成果、能享受的當下。當你被迫倉促或浪費時，會本能地抗拒。',
+  '雙子':'你天生靠訊息與連結存活 — 好奇、多線、需要對話刺激。當你被困在單調環境，會迅速凋萎。',
+  '巨蟹':'你天生需要情感歸屬感 — 保護所愛、記得細節。當你的安全感被威脅時，會退縮築殼。',
+  '獅子':'你天生需要被看見與創造 — 慷慨、自信、要舞台。當你的光被無視時，會委屈或誇張表現。',
+  '處女':'你天生有改進世界的本能 — 精準、實用、細節控。當環境混亂或粗糙時，會焦慮或挑剔。',
+  '天秤':'你天生追求平衡與美感 — 重視關係、合作、優雅。當你被迫粗暴或選邊時，會搖擺不定。',
+  '天蠍':'你天生有深度與穿透力 — 重視真實、忠誠、轉化。當表面或背叛出現時，會徹底切斷。',
+  '射手':'你天生需要意義與遠方 — 自由、樂觀、好真理。當你被局限或瑣事困住時，會逃離。',
+  '摩羯':'你天生帶著建造的本能 — 紀律、長期、看權威。當努力被否定時，會更頑固地證明自己。',
+  '水瓶':'你天生帶著未來感與獨立性 — 創新、社群、不從俗。當你被要求一致時，會故意逆向。',
+  '雙魚':'你天生有融合與感應的能力 — 慈悲、想像、邊界模糊。當現實太冷硬時，會抽離或迷失。',
+};
+const MOON_SIGN={
+  '牡羊':'情緒來得快、去得也快，需要立即出口；不擅長悶著。',
+  '金牛':'情緒需要穩定的物理環境（食物、觸覺、慣常空間）才能平復。',
+  '雙子':'情緒需要「說出來」才能消化；獨自悶著反而會放大。',
+  '巨蟹':'情緒深、容易受家人/熟人影響；需要安全的窩。',
+  '獅子':'情緒需要被注意、被回應；忽視是最大的傷。',
+  '處女':'情緒透過「整理」消化（清單、整理空間、運動規律）。',
+  '天秤':'情緒在「不確定」與「失衡」時最痛；需要美感或公平感。',
+  '天蠍':'情緒深沉、不外顯；信任後才會深層流露。',
+  '射手':'情緒透過「拉開距離」消化（旅行、運動、找新觀點）。',
+  '摩羯':'情緒被理性壓住，但會累積；需要產出感才安心。',
+  '水瓶':'情緒透過「抽離觀察」處理，旁人覺得冷其實是自我保護。',
+  '雙魚':'情緒像海綿，容易吸收他人；需要獨處、藝術或睡眠重整。',
+};
+const ASC_SIGN={
+  '牡羊':'別人第一眼覺得你「直接、有活力」。','金牛':'別人第一眼覺得你「沉穩、有質感」。',
+  '雙子':'別人第一眼覺得你「機靈、好溝通」。','巨蟹':'別人第一眼覺得你「溫和、有距離感」。',
+  '獅子':'別人第一眼覺得你「有存在感、明亮」。','處女':'別人第一眼覺得你「乾淨、低調、認真」。',
+  '天秤':'別人第一眼覺得你「優雅、好相處」。','天蠍':'別人第一眼覺得你「深、有點神祕」。',
+  '射手':'別人第一眼覺得你「自由、樂觀、開放」。','摩羯':'別人第一眼覺得你「成熟、有重量感」。',
+  '水瓶':'別人第一眼覺得你「特別、有距離、聰明」。','雙魚':'別人第一眼覺得你「柔軟、夢幻、難捉摸」。',
+};
+const NODE_AXIS={
+  '牡羊':'今生功課：學習為自己出聲；舒適區是「為他人協調」。',
+  '金牛':'今生功課：學習穩定與自我價值；舒適區是「強烈體驗」。',
+  '雙子':'今生功課：學習多元觀點；舒適區是「絕對真理」。',
+  '巨蟹':'今生功課：學習情感連結；舒適區是「成就導向」。',
+  '獅子':'今生功課：學習自我表達；舒適區是「為群體服務」。',
+  '處女':'今生功課：學習腳踏實地；舒適區是「逃避到夢境」。',
+  '天秤':'今生功課：學習合作；舒適區是「獨來獨往」。',
+  '天蠍':'今生功課：學習深度與放下控制；舒適區是「物質安穩」。',
+  '射手':'今生功課：學習信任直覺；舒適區是「資訊收集」。',
+  '摩羯':'今生功課：學習承擔責任；舒適區是「家庭照顧」。',
+  '水瓶':'今生功課：學習為群體理想付出；舒適區是「個人榮耀」。',
+  '雙魚':'今生功課：學習臣服與整體感；舒適區是「分析批判」。',
+};
+const TRANSIT_THROUGH_HOUSE={
+  '太陽':{1:'本月你「想被看見」的能量強。',2:'本月聚焦資源與自我價值。',3:'本月想多溝通、學習、短程移動。',4:'本月回歸家與內在。',5:'本月想創造、戀愛、玩樂。',6:'本月聚焦工作與健康。',7:'本月伴侶/合作議題浮現。',8:'本月處理深度與共同資源。',9:'本月渴望意義、學習、遠方。',10:'本月事業與名聲被推上前。',11:'本月社群與未來計畫活躍。',12:'本月需要沉澱與獨處。'},
+  '月亮':{1:'今日情緒外顯。',2:'今日重視物質與安全感。',3:'今日多話、需要交流。',4:'今日想回家、想吃熟悉的味道。',5:'今日情緒明亮、想表達。',6:'今日對日常細節敏感。',7:'今日依賴他人陪伴。',8:'今日情緒深、需要私密。',9:'今日想出走、看遠的。',10:'今日情緒被公領域影響。',11:'今日想與群體連結。',12:'今日想躲起來。'},
+};
+function aspectKey(a,b){return [a,b].sort().join('|');}
+const ASPECT_INTERP={
+  '月亮|太陽':{合相:'內外一致，目標與情感同步，但缺少張力推動改變。',四分:'目標與情感拉扯，常感「想做的」與「真心想要的」不同。',對分:'公私之間需要切換，容易在「自我」與「家庭/伴侶」間擺盪。',三分:'內在和諧，意志與情感同方向，是天生的「定」。',六分:'有意識與情緒的良性溝通管道。'},
+  '太陽|水星':{合相:'頭腦與自我緊密綁定，自我認同等於我說的話。'},
+  '太陽|金星':{合相:'魅力天生、愛美、有品味。',三分:'天生討喜，感情關係流暢。',四分:'容易為愛犧牲自我目標。',六分:'藝術或感情上有發揮空間。'},
+  '太陽|火星':{合相:'行動派，但容易自我中心、急躁。',四分:'目標與行動互相衝突，要小心衝動下決定。',三分:'執行力強，能自信地推進。',對分:'容易把目標投射到對手身上，靠競爭推動自己。'},
+  '太陽|木星':{合相:'天生樂觀、機會多，但要小心過度自信。',三分:'貴人運強，做事順風。',六分:'學習與擴張的良好機會。',四分:'過度承諾、過度膨脹。',對分:'容易在關係中過度給予或自我放大。'},
+  '太陽|土星':{合相:'責任感重，少年老成；成就需要時間。',四分:'自我懷疑、權威壓力，需要證明自己。',對分:'伴侶或權威常成為要求你的角色。',三分:'紀律與目標完美結合，慢但穩。',六分:'有耐心地築起影響力。'},
+  '太陽|天王星':{合相:'特立獨行、需要自由；不適合常規路。',四分:'頻繁的劇烈變動；容易突然推翻自己。',對分:'伴侶或合作者帶來突發變化。',三分:'創新天賦，與時代同步。'},
+  '太陽|海王星':{合相:'有靈性、藝術才能，但自我邊界模糊。',四分:'容易自我迷失、被欺騙或欺騙自己。',三分:'天生的同理與想像力。'},
+  '太陽|冥王星':{合相:'強烈的命運感、生命主題很重。',四分:'權力議題反覆、容易與權威衝突。',對分:'伴侶或合作者帶來控制或轉化。',三分:'有深度的影響力與蛻變能力。'},
+  '月亮|金星':{合相:'感性溫柔、討人喜歡。',三分:'情感與關係和諧。',四分:'感情上容易被情緒淹沒。'},
+  '月亮|火星':{合相:'情緒激烈、易怒但也熱情。',四分:'情緒一上來就行動，事後常後悔。',對分:'家庭或情感與行動衝突。',三分:'情緒能轉成行動力。'},
+  '月亮|木星':{合相:'樂觀、慷慨、需要被需要。',三分:'天生有福氣、家庭支持強。'},
+  '月亮|土星':{合相:'童年情感壓抑，成熟後成為穩定者。',四分:'安全感不足，容易自我設限。',對分:'伴侶常成為情緒重壓來源。'},
+  '月亮|天王星':{合相:'情緒善變、需要極大自由。',四分:'家庭或情感劇變、難安定。'},
+  '月亮|海王星':{合相:'高度敏感、易感應、需要藝術或靈性出口。',四分:'容易自我欺騙、沉溺逃避。',三分:'同理心強、有療癒能力。'},
+  '月亮|冥王星':{合相:'情感極端、深愛或深恨。',四分:'母親或女性議題會反覆出現。',對分:'親密關係容易掉入控制 vs 被控制。'},
+  '水星|金星':{合相:'說話討喜、文字有美感。',三分:'外交、創作天賦。'},
+  '水星|火星':{合相:'思考快、講話直；容易吵架。',四分:'容易脫口說錯話。',三分:'說服力強、論述清晰。'},
+  '水星|木星':{合相:'視野大、好教學、容易誇大。',三分:'學習能力強、表達流暢。',四分:'說太多、承諾太多。'},
+  '水星|土星':{合相:'思考嚴謹、慢但深；不擅閒聊。',四分:'容易自我懷疑、表達被卡。',三分:'有結構的思考天賦。'},
+  '水星|天王星':{合相:'點子多、跳躍式思考；天才與瘋子一線間。',四分:'思緒太快、易神經緊繃。'},
+  '水星|海王星':{合相:'直覺強、想像力豐富；但邏輯易被情緒污染。',四分:'容易被誤解或誤解他人。'},
+  '水星|冥王星':{合相:'思考深刻、有洞察；說話有力量。',四分:'容易強迫式思考、執著。'},
+  '火星|金星':{合相:'熱情且浪漫，性吸引力高。',四分:'感情張力大、易愛恨交織。',三分:'感情主動、表達自然。',對分:'感情中容易為了和諧壓抑慾望，或反之。'},
+  '木星|金星':{合相:'人氣旺、桃花多、錢途好。',三分:'感情幸運、生活舒適。'},
+  '土星|金星':{合相:'感情慢熱、看重承諾；可能晚婚。',四分:'感情容易遭挫折或冷淡。',三分:'感情穩定、能長久。'},
+  '天王星|金星':{合相:'感情來去都快、需要新鮮感。',四分:'感情劇烈變化、難穩定。'},
+  '海王星|金星':{合相:'浪漫、理想化伴侶、容易愛上幻象。',四分:'感情中易被欺騙或自我欺騙。'},
+  '冥王星|金星':{合相:'愛得深、佔有強；變動是必修。',四分:'感情常涉及權力、忌妒、控制。'},
+  '木星|火星':{合相:'行動大膽、運動好手、容易冒險。',三分:'執行力與機會配合得好。'},
+  '土星|火星':{合相:'行動受限、易壓抑；長期累積會爆。',四分:'容易半途而廢、與權威衝突。',三分:'紀律配合行動，築成耐力者。'},
+  '天王星|火星':{合相:'閃電行動、衝動、意外多。',四分:'易出車禍或突發衝突。'},
+  '海王星|火星':{合相:'行動目標不明、能量易渙散。',四分:'容易為虛幻目標耗能。'},
+  '冥王星|火星':{合相:'極端行動力、執著到底。',四分:'易陷入權力鬥爭。'},
+  '木星|土星':{合相:'擴張與限制並存，務實的長期建造者。',四分:'機會與責任拉扯，常感「想擴張卻被卡」。',對分:'樂觀與悲觀循環。',三分:'有遠見也有紀律，慢慢做大。'},
+  '木星|天王星':{合相:'突發的機會、創新與好運。',四分:'機會來得太快易抓不住。'},
+  '木星|海王星':{合相:'信仰、靈性、藝術的擴張；但易理想化。'},
+  '木星|冥王星':{合相:'深層轉化的機會、影響力大。'},
+  '土星|天王星':{合相:'秩序與革命的拉扯。',四分:'容易在「穩定」與「自由」間反覆切換。'},
+  '土星|海王星':{合相:'現實與理想的整合議題。',四分:'易感無力、信念被現實打擊。'},
+  '土星|冥王星':{合相:'時代性的轉化壓力。',四分:'長期的權力結構議題。'},
+};
+function aspectInterp(a,b,type){
+  const e=ASPECT_INTERP[aspectKey(a,b)];
+  if(e&&e[type]) return e[type];
+  return null;
+}
+function elementWarnings(elemCount){
+  const warnings=[];
+  const total=Object.values(elemCount).reduce((a,b)=>a+b,0);
+  Object.entries(elemCount).forEach(([elem,cnt])=>{
+    if(cnt===0){
+      const m={'火':'容易缺少行動力與熱情 — 重要決定要刻意推自己一把。','土':'容易忽略物質現實與細節 — 需要外在結構（行事曆、紀律）。','風':'容易困在自己的世界 — 多對話、多寫下來、多徵求第三方意見。','水':'容易壓抑情感 — 需要刻意處理情緒，否則會以身體症狀現身。'};
+      warnings.push(`完全沒有${elem}象 — ${m[elem]}`);
+    } else if(cnt/total>=0.5){
+      const m={'火':'過度火象 — 容易衝動、燒乾，需要冷卻與計畫。','土':'過度土象 — 容易僵化、抗拒變化，需要彈性與靈感。','風':'過度風象 — 想很多但難落地，需要把想法變成行動。','水':'過度水象 — 容易被情感淹沒，需要理性錨點。'};
+      warnings.push(m[elem]);
+    }
+  });
+  return warnings;
+}
+function findHouse(lon,cusps){
+  lon=((lon%360)+360)%360;
+  for(let i=0;i<12;i++){
+    const a=cusps[i],b=cusps[(i+1)%12];
+    if(a<b){if(a<=lon&&lon<b) return i+1;}
+    else{if(lon>=a||lon<b) return i+1;}
+  }
+  return 12;
+}
 
 // 星空
 (function(){
   const c=document.getElementById('stars');
   for(let i=0;i<100;i++){
-    const s=document.createElement('span'); s.className='star';
-    s.style.top=Math.random()*100+'%'; s.style.left=Math.random()*100+'%';
-    const sz=Math.random()*2+1; s.style.width=sz+'px'; s.style.height=sz+'px';
+    const s=document.createElement('span');s.className='star';
+    s.style.top=Math.random()*100+'%';s.style.left=Math.random()*100+'%';
+    const sz=Math.random()*2+1;s.style.width=sz+'px';s.style.height=sz+'px';
     s.style.setProperty('--d',(Math.random()*4+2)+'s');
     s.style.setProperty('--delay',(Math.random()*5)+'s');
     c.appendChild(s);
   }
 })();
-
-// 填入下拉
 (function(){
   const y=document.getElementById('year'),m=document.getElementById('month'),d=document.getElementById('day');
   const cy=new Date().getFullYear();
@@ -179,12 +303,8 @@ const SHICHEN = [
   for(let i=1;i<=31;i++) d.add(new Option(i,i));
   const sh=document.getElementById('shichen');
   SHICHEN.forEach(([label,_])=>sh.add(new Option(label,label.split('（')[0])));
-  // 預設 target = 今天
-  const today=new Date().toISOString().split('T')[0];
-  document.getElementById('targetDate').value=today;
+  document.getElementById('targetDate').value=new Date().toISOString().split('T')[0];
 })();
-
-// 時間模式切換
 document.querySelectorAll('input[name="tmode"]').forEach(r=>{
   r.addEventListener('change',()=>{
     const exact=document.querySelector('input[name="tmode"]:checked').value==='exact';
@@ -193,16 +313,11 @@ document.querySelectorAll('input[name="tmode"]').forEach(r=>{
     validate();
   });
 });
-
 function validate(){
-  const y=document.getElementById('year').value;
-  const m=document.getElementById('month').value;
-  const d=document.getElementById('day').value;
+  const y=document.getElementById('year').value,m=document.getElementById('month').value,d=document.getElementById('day').value;
   const place=document.getElementById('place').value.trim();
   const mode=document.querySelector('input[name="tmode"]:checked').value;
-  const t=mode==='exact'
-    ? document.getElementById('exactTime').value
-    : document.getElementById('shichen').value;
+  const t=mode==='exact'?document.getElementById('exactTime').value:document.getElementById('shichen').value;
   const td=document.getElementById('targetDate').value;
   document.getElementById('submitBtn').disabled=!(y&&m&&d&&place&&t&&td);
 }
@@ -210,246 +325,220 @@ function validate(){
   document.getElementById(id).addEventListener('input',validate);
   document.getElementById(id).addEventListener('change',validate);
 });
-
-function shichenToTime(name){
-  const f=SHICHEN.find(s=>s[0].startsWith(name));
-  return f?f[1]:'12:00';
-}
-
-function show(view){
-  document.getElementById('form-view').style.display=view==='form'?'':'none';
-  document.getElementById('loading-view').style.display=view==='loading'?'':'none';
-  document.getElementById('report-view').style.display=view==='report'?'':'none';
-}
-function showError(msg){
-  const e=document.getElementById('error');e.textContent=msg;e.style.display='';
-}
+function shichenToTime(name){const f=SHICHEN.find(s=>s[0].startsWith(name));return f?f[1]:'12:00';}
+function show(view){['form','loading','report'].forEach(v=>document.getElementById(v+'-view').style.display=v===view?'':'none');}
+function showError(msg){const e=document.getElementById('error');e.textContent=msg;e.style.display='';}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 document.getElementById('submitBtn').addEventListener('click',async()=>{
   document.getElementById('error').style.display='none';
-  const y=+document.getElementById('year').value;
-  const m=+document.getElementById('month').value;
-  const d=+document.getElementById('day').value;
+  const y=+document.getElementById('year').value,m=+document.getElementById('month').value,d=+document.getElementById('day').value;
   const place=document.getElementById('place').value.trim();
   const mode=document.querySelector('input[name="tmode"]:checked').value;
-  const time=mode==='exact'
-    ? document.getElementById('exactTime').value
-    : shichenToTime(document.getElementById('shichen').value);
+  const time=mode==='exact'?document.getElementById('exactTime').value:shichenToTime(document.getElementById('shichen').value);
   const target=document.getElementById('targetDate').value;
-
   const birthDate=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
   const birthLabel=`${y}年${m}月${d}日 ${time} ${place}`;
-
   show('loading');
   try{
-    const res=await fetch('/api/chart',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({birthDate,birthTime:time,birthPlace:place,target}),
-    });
+    const res=await fetch('/api/chart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({birthDate,birthTime:time,birthPlace:place,target})});
     const data=await res.json();
     if(!data.ok) throw new Error(data.error||'計算失敗');
     render(data,birthLabel,target);
     show('report');
-  }catch(err){
-    show('form');
-    showError(err.message||'計算失敗');
-  }
+  }catch(err){show('form');showError(err.message||'計算失敗');}
 });
 
-function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function renderChartSVG(w){
+  const houseCusps=(w.houses||[]).map(h=>h.lon);
+  const W=420,cx=W/2,cy=W/2,rOuter=190,rInner=140,rHouse=110,rCenter=80;
+  const ascLon=w.ascendant.lon;
+  function lonToAngle(lon){return 180-(lon-ascLon);}
+  function pos(lon,r){const a=lonToAngle(lon)*Math.PI/180;return [cx+r*Math.cos(a),cy-r*Math.sin(a)];}
+  let svg=`<svg class="chart-svg" viewBox="0 0 ${W} ${W}" xmlns="http://www.w3.org/2000/svg">`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="${rOuter}" fill="none" stroke="rgba(201,168,76,0.4)" stroke-width="1.5"/>`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="${rInner}" fill="none" stroke="rgba(201,168,76,0.25)" stroke-width="1"/>`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="${rHouse}" fill="none" stroke="rgba(201,168,76,0.2)" stroke-width="0.8"/>`;
+  svg+=`<circle cx="${cx}" cy="${cy}" r="${rCenter}" fill="none" stroke="rgba(201,168,76,0.15)" stroke-width="0.5"/>`;
+  for(let i=0;i<12;i++){
+    const lon=i*30;
+    const [x1,y1]=pos(lon,rInner);const [x2,y2]=pos(lon,rOuter);
+    svg+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(201,168,76,0.3)" stroke-width="0.6"/>`;
+    const [tx,ty]=pos(lon+15,rOuter-15);
+    svg+=`<text x="${tx}" y="${ty}" fill="#f0d080" font-size="14" text-anchor="middle" dominant-baseline="central">${SIGN_SYMBOL[SIGNS[i]]}</text>`;
+  }
+  if(houseCusps){
+    houseCusps.forEach((cusp,i)=>{
+      const [x1,y1]=pos(cusp,rHouse);const [x2,y2]=pos(cusp,rInner);
+      svg+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(201,168,76,0.4)" stroke-width="${(i===0||i===3||i===6||i===9)?1.5:0.8}"/>`;
+      const next=houseCusps[(i+1)%12];const span=(next-cusp+360)%360||30;
+      const [lx,ly]=pos(cusp+span/2,rHouse-15);
+      svg+=`<text x="${lx}" y="${ly}" fill="rgba(245,240,232,0.4)" font-size="10" text-anchor="middle">${i+1}</text>`;
+    });
+  }
+  const [ax,ay]=pos(w.ascendant.lon,rOuter+10);
+  svg+=`<text x="${ax}" y="${ay}" fill="#c9a84c" font-size="11" text-anchor="middle">AC</text>`;
+  const [mx,my]=pos(w.midheaven.lon,rOuter+10);
+  svg+=`<text x="${mx}" y="${my}" fill="#c9a84c" font-size="11" text-anchor="middle">MC</text>`;
+  w.planets.forEach(p=>{
+    const [px,py]=pos(p.lon,rInner-20);
+    svg+=`<text x="${px}" y="${py}" fill="#f5f0e8" font-size="16" text-anchor="middle" dominant-baseline="central">${PLANET_SYMBOL[p.name]||p.name[0]}</text>`;
+    const [dx,dy]=pos(p.lon,rInner-38);
+    svg+=`<text x="${dx}" y="${dy}" fill="rgba(245,240,232,0.5)" font-size="8" text-anchor="middle">${p.deg}°${p.retrograde?'R':''}</text>`;
+  });
+  (w.aspects||[]).slice(0,12).forEach(a=>{
+    const pa=w.planets.find(p=>p.name===a.a);const pb=w.planets.find(p=>p.name===a.b);
+    if(!pa||!pb) return;
+    const [x1,y1]=pos(pa.lon,rCenter);const [x2,y2]=pos(pb.lon,rCenter);
+    const color={'合相':'rgba(201,168,76,0.5)','三分':'rgba(120,180,255,0.5)','六分':'rgba(120,180,255,0.3)','四分':'rgba(255,120,120,0.5)','對分':'rgba(255,120,120,0.4)'}[a.type]||'rgba(255,255,255,0.2)';
+    svg+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${(a.type==='合相'||a.type==='對分')?1.2:0.8}"/>`;
+  });
+  svg+=`</svg>`;
+  return svg;
 }
 
-// 元素屬性（火象/土象/風象/水象）
-const ELEMENT={
-  '牡羊':'火','獅子':'火','射手':'火',
-  '金牛':'土','處女':'土','摩羯':'土',
-  '雙子':'風','天秤':'風','水瓶':'風',
-  '巨蟹':'水','天蠍':'水','雙魚':'水',
-};
-
-// 行星意義（給條列建議用）
-const PLANET_TOPIC={
-  '太陽':'核心目標','月亮':'情緒與內在需求','水星':'溝通與思考','金星':'感情與美感',
-  '火星':'行動與衝勁','木星':'機會與擴張','土星':'責任與限制',
-  '天王星':'變化','海王星':'靈感與夢想','冥王星':'轉化',
-};
-
-// 相位顏色
-const ASPECT_VIBE={
-  '合相':'neutral','六分':'good','三分':'good','四分':'bad','對分':'bad'
-};
+function renderZiwei(zw){
+  if(!zw||!zw.palaces) return '';
+  const mainNames=['命宮','財帛','官祿','遷移'];
+  const found=mainNames.map(n=>zw.palaces.find(p=>(p.name||p.palace_name||'').includes(n))).filter(Boolean);
+  return `<div class="glass section">
+    <h2>★ 紫微斗數 · 四大主宮</h2>
+    <div class="summary-row"><span class="k">五行局</span><span class="v">${escapeHtml(zw.five_elements_class||zw.fiveElementsClass||'-')}</span></div>
+    <div class="summary-row"><span class="k">命主 / 身主</span><span class="v">${escapeHtml(zw.soul||'-')} / ${escapeHtml(zw.body||'-')}</span></div>
+    ${found.map(p=>{
+      const stars=[...(p.major_stars||p.majorStars||[]),...(p.minor_stars||p.minorStars||[])].map(s=>typeof s==='string'?s:(s.name||s.label||'')).filter(Boolean);
+      const name=p.name||p.palace_name||'';
+      return `<div style="margin-top:12px"><div class="label">${escapeHtml(name)}</div>
+        ${stars.length?`<div class="pill-row">${stars.slice(0,6).map(s=>`<span class="pill">${escapeHtml(s)}</span>`).join('')}</div>`:'<div style="opacity:.4;font-size:12px">空宮</div>'}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
 
 function render(data,birthLabel,target){
-  const c=data.chart;
-  const w=c.western;
-  const hd=c.human_design;
-  const zw=c.ziwei;
+  const c=data.chart,w=c.western,hd=c.human_design,zw=c.ziwei;
+  const transits=data.transits||{},taspects=data.transit_aspects||[];
   const todayCN=new Date(target+'T00:00').toLocaleDateString('zh-TW',{year:'numeric',month:'long',day:'numeric'});
-
-  // 西洋本命：太陽星座、上升、月亮
   const sun=w.planets.find(p=>p.name==='太陽');
   const moon=w.planets.find(p=>p.name==='月亮');
-  const asc=w.ascendant;
-
-  // 元素分布
+  const asc=w.ascendant,mc=w.midheaven;
+  const nNode=w.planets.find(p=>p.name==='北交點');
   const elemCount={'火':0,'土':0,'風':0,'水':0};
-  w.planets.forEach(p=>{const e=ELEMENT[p.sign];if(e)elemCount[e]++;});
-  const elemDominant=Object.entries(elemCount).sort((a,b)=>b[1]-a[1])[0][0];
+  const qualityCount={'本位':0,'固定':0,'變動':0};
+  w.planets.forEach(p=>{if(ELEMENT[p.sign])elemCount[ELEMENT[p.sign]]++;if(QUALITY[p.sign])qualityCount[QUALITY[p.sign]]++;});
+  const elemWarnings=elementWarnings(elemCount);
 
-  // 今日建議：基於本命 + 簡單規則
-  const advice=buildAdvice(w,hd,zw,target);
+  const aspectStories=[];
+  (w.aspects||[]).forEach(a=>{
+    if(aspectStories.length>=8) return;
+    const interp=aspectInterp(a.a,a.b,a.type);
+    if(interp) aspectStories.push({...a,interp});
+  });
 
-  const html=`
-    <div class="report">
-      <div class="report-header">
-        <p class="birth-info">${escapeHtml(birthLabel)} 生</p>
-        <h1>✦ 星盤解讀</h1>
-        <p class="date">查看日期：${escapeHtml(todayCN)}</p>
-      </div>
+  const houseCusps=(w.houses||[]).map(h=>h.lon);
+  const transitTips=[];
+  ['太陽','月亮'].forEach(pn=>{
+    if(transits[pn]&&houseCusps.length){
+      const h=findHouse(transits[pn].lon,houseCusps);
+      if(TRANSIT_THROUGH_HOUSE[pn]&&TRANSIT_THROUGH_HOUSE[pn][h]){
+        transitTips.push(`${PLANET_SYMBOL[pn]} 今日${pn}走過你本命第 ${h} 宮 — ${TRANSIT_THROUGH_HOUSE[pn][h]}`);
+      }
+    }
+  });
+  const exactTaspects=taspects.filter(a=>a.orb<3).slice(0,6);
 
-      <div class="glass section">
-        <h2>☉ 本命星盤概覽</h2>
-        <div class="summary-row"><span class="k">太陽星座</span><span class="v">${escapeHtml(sun.sign)} ${sun.deg}°${String(sun.min).padStart(2,'0')}'</span></div>
-        <div class="summary-row"><span class="k">月亮星座</span><span class="v">${escapeHtml(moon.sign)} ${moon.deg}°${String(moon.min).padStart(2,'0')}'</span></div>
-        <div class="summary-row"><span class="k">上升星座</span><span class="v">${escapeHtml(asc.sign)} ${asc.deg}°${String(asc.min).padStart(2,'0')}'</span></div>
-        <div class="summary-row"><span class="k">主導元素</span><span class="v">${elemDominant}象（火${elemCount['火']}/土${elemCount['土']}/風${elemCount['風']}/水${elemCount['水']}）</span></div>
-      </div>
-
-      <div class="glass section">
-        <h2>♄ 十大行星位置</h2>
-        <table>
-          <thead><tr><th>行星</th><th>星座度數</th><th>宮位</th></tr></thead>
-          <tbody>
-            ${w.planets.map(p=>`
-              <tr>
-                <td>${escapeHtml(p.name)}${p.retrograde?'<span class="badge retro">逆</span>':''}</td>
-                <td>${escapeHtml(p.sign)} ${p.deg}°${String(p.min).padStart(2,'0')}'</td>
-                <td>${p.house}宮</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="glass section">
-        <h2>✦ 重要相位（精度最高前 8）</h2>
-        <table>
-          <thead><tr><th>行星 A</th><th>相位</th><th>行星 B</th><th>容許</th></tr></thead>
-          <tbody>
-            ${(w.aspects||[]).slice(0,8).map(a=>`
-              <tr>
-                <td>${escapeHtml(a.a)}</td>
-                <td class="${ASPECT_VIBE[a.type]==='good'?'hl-good':ASPECT_VIBE[a.type]==='bad'?'hl-bad':''}">${escapeHtml(a.type)}</td>
-                <td>${escapeHtml(a.b)}</td>
-                <td>±${a.orb.toFixed(2)}°</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-
-      ${hd ? `
-      <div class="glass section">
-        <h2>⌬ 人類圖摘要</h2>
-        <div class="summary-row"><span class="k">類型</span><span class="v">${escapeHtml(hd.type||'-')}</span></div>
-        <div class="summary-row"><span class="k">權威</span><span class="v">${escapeHtml(hd.authority||'-')}</span></div>
-        <div class="summary-row"><span class="k">人生角色</span><span class="v">${escapeHtml(hd.profile||'-')}</span></div>
-        <div class="summary-row"><span class="k">定義</span><span class="v">${escapeHtml(hd.definition||'-')}</span></div>
-      </div>
-      ` : ''}
-
-      ${zw ? `
-      <div class="glass section">
-        <h2>★ 紫微斗數摘要</h2>
-        <div class="summary-row"><span class="k">五行局</span><span class="v">${escapeHtml(zw.five_elements_class||zw.fiveElementsClass||'-')}</span></div>
-        <div class="summary-row"><span class="k">命主</span><span class="v">${escapeHtml(zw.soul||'-')}</span></div>
-        <div class="summary-row"><span class="k">身主</span><span class="v">${escapeHtml(zw.body||'-')}</span></div>
-      </div>
-      ` : ''}
-
-      <div class="glass section">
-        <h2>✦ 今日條列建議</h2>
-        <ul class="advice">
-          ${advice.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}
-        </ul>
-      </div>
-
-      <button class="btn secondary" id="resetBtn">✦ 重新查詢</button>
+  const html=`<div class="report">
+    <div class="report-header">
+      <p class="birth-info">${escapeHtml(birthLabel)} 生</p>
+      <h1>✦ 星盤解讀</h1>
+      <p class="date">查看日期：${escapeHtml(todayCN)}</p>
     </div>
-  `;
+
+    <div class="glass section">
+      <h2>☉ 你的三位一體</h2>
+      <div class="summary-row"><span class="k">太陽（核心自我）</span><span class="v">${escapeHtml(sun.sign)} ${sun.deg}°${String(sun.min).padStart(2,'0')}'</span></div>
+      <div class="interp-block">${escapeHtml(SUN_SIGN[sun.sign]||'')}</div>
+      <div class="summary-row" style="margin-top:10px"><span class="k">月亮（內在情感）</span><span class="v">${escapeHtml(moon.sign)} ${moon.deg}°${String(moon.min).padStart(2,'0')}'</span></div>
+      <div class="interp-block">${escapeHtml(MOON_SIGN[moon.sign]||'')}</div>
+      <div class="summary-row" style="margin-top:10px"><span class="k">上升（外顯印象）</span><span class="v">${escapeHtml(asc.sign)} ${asc.deg}°${String(asc.min).padStart(2,'0')}'</span></div>
+      <div class="interp-block">${escapeHtml(ASC_SIGN[asc.sign]||'')}</div>
+    </div>
+
+    <div class="glass section">
+      <h2>⊕ 本命星盤圖</h2>
+      ${renderChartSVG(w)}
+      <p style="font-size:11px;opacity:.5;text-align:center;margin-top:8px">金線=合相 · 藍線=三/六分（吉） · 紅線=四分/對分（張力）</p>
+    </div>
+
+    <div class="glass section">
+      <h2>✦ 元素與質性分布</h2>
+      <div class="summary-row"><span class="k">元素</span><span class="v">火${elemCount['火']} · 土${elemCount['土']} · 風${elemCount['風']} · 水${elemCount['水']}</span></div>
+      <div class="summary-row"><span class="k">質性</span><span class="v">本位${qualityCount['本位']} · 固定${qualityCount['固定']} · 變動${qualityCount['變動']}</span></div>
+      ${elemWarnings.length?`<ul class="advice" style="margin-top:12px">${elemWarnings.map(w=>`<li class="warn">⚠ ${escapeHtml(w)}</li>`).join('')}</ul>`:''}
+    </div>
+
+    <div class="glass section">
+      <h2>⟁ 命盤軸線</h2>
+      <div class="summary-row"><span class="k">天頂 MC（事業方向）</span><span class="v">${escapeHtml(mc.sign)} ${mc.deg}°${String(mc.min).padStart(2,'0')}'</span></div>
+      <div class="summary-row"><span class="k">天底 IC（根基方向）</span><span class="v">${SIGNS[(SIGNS.indexOf(mc.sign)+6)%12]}</span></div>
+      ${nNode?`<div class="summary-row"><span class="k">北交點（今生方向）</span><span class="v">${escapeHtml(nNode.sign)}</span></div>
+      <div class="interp-block">${escapeHtml(NODE_AXIS[nNode.sign]||'')}</div>`:''}
+    </div>
+
+    <div class="glass section">
+      <h2>♄ 十大行星位置</h2>
+      <table><thead><tr><th>行星</th><th>星座度數</th><th>宮位</th></tr></thead>
+      <tbody>${w.planets.map(p=>`<tr>
+        <td>${PLANET_SYMBOL[p.name]||''} ${escapeHtml(p.name)}${p.retrograde?'<span class="badge retro">逆</span>':''}</td>
+        <td>${escapeHtml(p.sign)} ${p.deg}°${String(p.min).padStart(2,'0')}'</td>
+        <td>${p.house}宮</td></tr>`).join('')}</tbody></table>
+    </div>
+
+    <div class="glass section">
+      <h2>✦ 你的主要相位 · 帶解讀</h2>
+      ${aspectStories.length?aspectStories.map(a=>`<div class="interp-block">
+        <strong>${escapeHtml(a.a)} ${escapeHtml(a.type)} ${escapeHtml(a.b)}</strong>
+        <span style="opacity:.5;font-size:11px"> · ±${a.orb.toFixed(1)}°</span>
+        <div style="margin-top:4px">${escapeHtml(a.interp)}</div></div>`).join(''):'<p style="opacity:.5">本命無強烈相位匹配字典</p>'}
+    </div>
+
+    <div class="glass section">
+      <h2>⟳ 今日天象（Transit）</h2>
+      <table><thead><tr><th>行星</th><th>今日位置</th></tr></thead>
+      <tbody>${Object.entries(transits).slice(0,7).map(([name,t])=>`<tr>
+        <td>${PLANET_SYMBOL[name]||''} ${escapeHtml(name)}${t.retrograde?'<span class="badge retro">逆</span>':''}</td>
+        <td>${escapeHtml(t.sign)} ${t.deg}°${String(t.min).padStart(2,'0')}'</td></tr>`).join('')}</tbody></table>
+      ${transitTips.length?`<div style="margin-top:12px">${transitTips.map(t=>`<div class="interp-block">${escapeHtml(t)}</div>`).join('')}</div>`:''}
+    </div>
+
+    ${exactTaspects.length?`<div class="glass section">
+      <h2>⚯ 今日天象 × 你本命 — 重要互動</h2>
+      ${exactTaspects.map(a=>{
+        const interp=aspectInterp(a.transit,a.natal,a.type);
+        return `<div class="interp-block">
+          <strong>今日${escapeHtml(a.transit)} ${escapeHtml(a.type)} 本命${escapeHtml(a.natal)}</strong>
+          <span style="opacity:.5;font-size:11px"> · ±${a.orb.toFixed(1)}°${a.exact?' <span class="badge exact">精準</span>':''}</span>
+          ${interp?`<div style="margin-top:4px">${escapeHtml(interp)}</div>`:''}</div>`;
+      }).join('')}</div>`:''}
+
+    ${hd?`<div class="glass section">
+      <h2>⌬ 人類圖摘要</h2>
+      <div class="summary-row"><span class="k">類型</span><span class="v">${escapeHtml(hd.type||'-')}</span></div>
+      <div class="summary-row"><span class="k">權威</span><span class="v">${escapeHtml(hd.authority||'-')}</span></div>
+      <div class="summary-row"><span class="k">人生角色</span><span class="v">${escapeHtml(hd.profile||'-')}</span></div>
+      <div class="summary-row"><span class="k">定義</span><span class="v">${escapeHtml(hd.definition||'-')}</span></div>
+      ${hd.incarnation_cross?`<div class="summary-row"><span class="k">輪迴交叉</span><span class="v">${escapeHtml(hd.incarnation_cross)}</span></div>`:''}
+      ${hd.defined_centers?`<div style="margin-top:10px"><div class="label">已定義能量中心</div><div class="pill-row">${hd.defined_centers.map(c=>`<span class="pill">${escapeHtml(c)}</span>`).join('')}</div></div>`:''}
+    </div>`:''}
+
+    ${renderZiwei(zw)}
+
+    <button class="btn secondary" id="resetBtn" style="margin-top:20px">✦ 重新查詢</button>
+  </div>`;
+
   document.getElementById('report-view').innerHTML=html;
   document.getElementById('resetBtn').addEventListener('click',()=>show('form'));
   window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function buildAdvice(w, hd, zw, target){
-  const tips=[];
-  const sun=w.planets.find(p=>p.name==='太陽');
-  const moon=w.planets.find(p=>p.name==='月亮');
-
-  // 月亮元素：當日情緒基調
-  const moonElem=ELEMENT[moon.sign];
-  const elemAdvice={
-    '火':'你天生的情緒節奏屬「火象」 — 今日適合主動出擊、明快決策，避免拖沓。',
-    '土':'你天生的情緒節奏屬「土象」 — 今日宜踏實處理具體事務，少談空想。',
-    '風':'你天生的情緒節奏屬「風象」 — 今日多交流、收集訊息，反而比悶頭做事有效。',
-    '水':'你天生的情緒節奏屬「水象」 — 今日感受敏銳，宜獨處或與信任的人深聊，避免人群消耗。',
-  };
-  if(moonElem) tips.push(elemAdvice[moonElem]);
-
-  // 太陽宮位提示
-  const sunHouseTip={
-    1:'本日核心議題回到「自我形象」 — 你怎麼出現在他人面前，比你說什麼更關鍵。',
-    2:'本日聚焦「資源與價值感」 — 處理金錢、所有物或自我價值的具體事務最順。',
-    3:'本日宜「短程移動與訊息」 — 重要的回覆、訊息、近距離交涉，今天搞定。',
-    4:'本日回到「家與根基」 — 適合居家、整理生活基地、與家人溝通。',
-    5:'本日是「表達與創造」的日子 — 展示、發表、戀愛、玩樂都有加分。',
-    6:'本日聚焦「日常與健康」 — 處理待辦清單、調整作息、健身比社交划算。',
-    7:'本日聚焦「合作與一對一」 — 重要對話、合約、合夥的好日子。',
-    8:'本日進入「深度與轉化」 — 適合處理共同資源、私密議題、不適合表面應酬。',
-    9:'本日視野放遠 — 學習、旅行、長期規劃、跨文化交流有靈感。',
-    10:'本日聚焦「事業與名聲」 — 對外的表現、權威人物互動是關鍵。',
-    11:'本日聚焦「社群與願景」 — 朋友、團體、未來計畫帶來機會。',
-    12:'本日適合「沉澱與獨處」 — 別硬撐，留時間給內在、休息、靈性。',
-  };
-  tips.push(sunHouseTip[sun.house]);
-
-  // 相位提示：挑 1 個最好 + 1 個最具挑戰
-  const goods=(w.aspects||[]).filter(a=>ASPECT_VIBE[a.type]==='good');
-  const bads=(w.aspects||[]).filter(a=>ASPECT_VIBE[a.type]==='bad');
-  if(goods.length){
-    const g=goods[0];
-    const t=PLANET_TOPIC[g.a]||PLANET_TOPIC[g.b]||'內在資源';
-    tips.push(`你的本命有「${g.a} ${g.type} ${g.b}」的吉相 — 在涉及「${t}」的場合最能發揮天生優勢。`);
-  }
-  if(bads.length){
-    const b=bads[0];
-    const t=PLANET_TOPIC[b.a]||PLANET_TOPIC[b.b]||'內在張力';
-    tips.push(`留意「${b.a} ${b.type} ${b.b}」的張力 — 涉及「${t}」時容易出現拉扯，今日做決定請放慢一拍。`);
-  }
-
-  // 逆行行星提醒
-  const retro=w.planets.filter(p=>p.retrograde).map(p=>p.name);
-  if(retro.length){
-    tips.push(`你的本命有逆行行星：${retro.join('、')} — 這些領域的成長傾向「內省式」，今天遇到相關卡關屬自然。`);
-  }
-
-  // 人類圖類型加碼
-  if(hd && hd.type){
-    const t=hd.type;
-    const m={
-      '生產者':'人類圖類型「生產者」 — 今日先「等待回應」再行動，胸口有反應的事才投入精力。',
-      '顯示生產者':'人類圖類型「顯示生產者」 — 你今日可以快，但要記得告知相關人，避免單方衝過頭。',
-      '顯示者':'人類圖類型「顯示者」 — 今日想做就做，但先「告知」會減少阻力。',
-      '投射者':'人類圖類型「投射者」 — 今日等待「被邀請」進入正確的場合與對話，能量會放大。',
-      '反映者':'人類圖類型「反映者」 — 今日先觀察環境氛圍再做反應，給自己 28 天決策期。',
-    };
-    Object.entries(m).forEach(([k,v])=>{ if(t.includes(k)) tips.push(v); });
-  }
-
-  return tips;
 }
 </script>
 </body>

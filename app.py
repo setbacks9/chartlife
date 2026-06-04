@@ -8,9 +8,71 @@ from flask import Flask, jsonify, request, send_from_directory
 
 # Import the engine. chart_engine.py is in the same directory.
 import chart_engine
+import swisseph as swe
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_folder=None)
+
+# ---- Transit computation (today's sky) ----
+TRANSIT_PLANETS = {
+    "太陽": swe.SUN, "月亮": swe.MOON, "水星": swe.MERCURY, "金星": swe.VENUS,
+    "火星": swe.MARS, "木星": swe.JUPITER, "土星": swe.SATURN,
+    "天王星": swe.URANUS, "海王星": swe.NEPTUNE, "冥王星": swe.PLUTO,
+}
+SIGNS = ['牡羊','金牛','雙子','巨蟹','獅子','處女','天秤','天蠍','射手','摩羯','水瓶','雙魚']
+ASPECT_DEFS = {0: ('合相', 7), 60: ('六分', 5), 90: ('四分', 6),
+               120: ('三分', 6), 180: ('對分', 7)}
+
+
+def compute_transits(target_date_str, tz_offset=0.0):
+    """target_date_str: 'YYYY-MM-DD'. Compute planet positions at noon local time."""
+    y, m, d = map(int, target_date_str.split('-'))
+    jd = swe.julday(y, m, d, 12.0 - tz_offset, swe.GREG_CAL)
+    flg = swe.FLG_MOSEPH | swe.FLG_SPEED
+    out = {}
+    for name, body in TRANSIT_PLANETS.items():
+        r = swe.calc_ut(jd, body, flg)
+        lon = r[0][0] % 360
+        speed = r[0][3]
+        sign_idx = int(lon // 30)
+        deg = lon - sign_idx * 30
+        dd = int(deg)
+        mm = int(round((deg - dd) * 60))
+        if mm == 60: mm = 0; dd += 1
+        out[name] = {
+            "lon": round(lon, 4),
+            "sign": SIGNS[sign_idx],
+            "deg": dd, "min": mm,
+            "label": f"{SIGNS[sign_idx]} {dd:02d}°{mm:02d}'",
+            "retrograde": speed < 0,
+        }
+    return out
+
+
+def compute_transit_aspects(transits, natal_planets):
+    """Find aspects between today's transit planets and natal planets."""
+    results = []
+    for tname, tdata in transits.items():
+        tlon = tdata["lon"]
+        for natal in natal_planets:
+            nname = natal["name"]
+            nlon = natal["lon"]
+            diff = abs(tlon - nlon) % 360
+            if diff > 180:
+                diff = 360 - diff
+            for target_angle, (atype, orb_limit) in ASPECT_DEFS.items():
+                orb = abs(diff - target_angle)
+                if orb <= orb_limit:
+                    results.append({
+                        "transit": tname,
+                        "type": atype,
+                        "natal": nname,
+                        "orb": round(orb, 2),
+                        "exact": orb < 1.5,
+                    })
+                    break
+    results.sort(key=lambda x: x["orb"])
+    return results
 
 # ---- city lookup (lat, lon, tz_offset) ----
 CITIES = {
@@ -93,10 +155,15 @@ def chart():
             "target": target,
         }
         result = chart_engine.build_json(inp)
+        # Compute today's transits + aspects to natal
+        transits = compute_transits(target, tz_offset=float(tz))
+        t_aspects = compute_transit_aspects(transits, result["western"]["planets"])
         return jsonify({
             "ok": True,
             "place_resolved": {"lat": lat, "lon": lon, "tz": tz},
             "chart": result,
+            "transits": transits,
+            "transit_aspects": t_aspects,
         })
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
