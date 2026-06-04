@@ -1,0 +1,4 @@
+pyswisseph==2.10.3.2
+py-iztro==0.1.5
+Flask==3.0.3
+gunicorn==23.0.0
