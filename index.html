@@ -285,6 +285,23 @@ function aspectInterp(a,b,type){
   if(e&&e[type]) return e[type];
   return null;
 }
+
+// 沒有字典條目時的「Transit 行星 + 相位類型」通用回退語
+const TRANSIT_FALLBACK={
+  '太陽':{合相:'今天能量灌在這領域，是重新出發或被看見的時機。',三分:'這領域今天順、有亮點，敢主動就有收穫。',六分:'這領域有支線機會，要自己伸手抓。',四分:'這領域今天會有人對你出招、或你跟權威槓上 — 別硬碰。',對分:'這領域容易被別人對立、或被看穿 — 先聽再回。'},
+  '月亮':{合相:'這領域今天情緒很滿，做事先處理感受再說。',三分:'這領域今天感覺對、人也對，順著走。',六分:'這領域有溫柔的好流動 — 聊聊、陪伴就有收穫。',四分:'這領域今天情緒容易卡住 — 先別做決定，睡一覺再說。',對分:'這領域跟某個人會有情緒拉扯，先冷靜不要回。'},
+  '水星':{合相:'這領域今天會收到重要訊息、或想通什麼，記得寫下來。',三分:'溝通順、簽約寫文章都OK。',六分:'閒聊或來訊都可能有用 — 保持開放。',四分:'容易誤會、文件出錯 — 重要訊息多檢查兩次。',對分:'今天會跟人講不通，先停、別繼續解釋。'},
+  '金星':{合相:'這領域今天最美、最甜 — 是約會、買美物、做美事的時刻。',三分:'這領域今天有桃花/有錢來/有人喜歡你 — 敢享受。',六分:'這領域有貴人帶來小確幸。',四分:'這領域今天容易消費過度、或感情誤判 — 慢一點。',對分:'感情或金錢上有對立的人 — 想清楚再回應。'},
+  '火星':{合相:'這領域今天能量大 — 想衝就衝，但別衝過頭。',三分:'這領域今天行動派發揮空間大。',六分:'有機會推進、有人會配合你出招。',四分:'這領域今天有衝突、有怒氣 — 開車、講話、做決定都慢一拍。',對分:'容易跟人正面槓上 — 不要逞強。'},
+  '木星':{合相:'這領域今天有大好機會、貴人就在附近 — 主動點。',三分:'這領域今天順風，敢承諾敢出手。',六分:'有意想不到的小確幸 — 接住它。',四分:'容易誇大、過度承諾 — 今天別簽長期的東西。',對分:'有人會給你過大的承諾 — 別輕易信。'},
+  '土星':{合相:'這領域今天會被現實考驗 — 不是壞事，是該紮根的時刻。',三分:'這領域今天可以做長期規劃、定下紀律。',六分:'適合做需要耐心的事，慢慢磨。',四分:'這領域今天會卡 — 不是你的錯，是時機未到，耐住性子。',對分:'會遇到很難搞的權威或限制 — 別跟它對著幹。'},
+  '天王星':{合相:'這領域今天會有突發變化 — 不要抗拒，順著轉。',三分:'創新點子、新機會冒出來 — 抓住第一個直覺。',六分:'有新東西想試？今天適合動手。',四分:'容易出意外、計畫被打亂 — 留彈性、別排太滿。',對分:'有人或事會用很突然的方式逼你變 — 別硬撐舊的。'},
+  '海王星':{合相:'這領域今天能量很夢幻 — 適合創作、做夢、療癒，但別簽合約。',三分:'直覺特別準、靈感特別多 — 寫下來。',六分:'這領域有溫柔流動、適合付出。',四分:'容易被騙或自我欺騙 — 別相信「太美好」的話。',對分:'會有人讓你看不清楚 — 等霧散了再決定。'},
+  '冥王星':{合相:'這領域今天會被深深翻一次 — 痛但會脫胎換骨。',三分:'適合做大轉變、處理深層議題。',六分:'有機會放下舊的、抓到深的力量。',四分:'容易陷入控制或被控制 — 看清楚誰想要什麼。',對分:'有人會在這領域跟你權力對戰 — 你不需要贏。'},
+};
+function transitInterp(transit, type){
+  return TRANSIT_FALLBACK[transit]?.[type]||null;
+}
 function elementWarnings(elemCount){
   const warnings=[];
   const total=Object.values(elemCount).reduce((a,b)=>a+b,0);
@@ -475,23 +492,29 @@ function buildTodayAdvice(transits, taspects, w){
   }
 
   // 2. 分類：愛情 / 事業 / 財運 / 健康 / 溝通
+  // 各領域已用掉的相位，避免不同分類重複
+  const usedAspects=new Set();
+  function aspectId(a){return `${a.transit}|${a.type}|${a.natal}`;}
+
   function categoryAdvice(planetNames, label){
-    const relevant=taspects.filter(a=>planetNames.includes(a.transit)||planetNames.includes(a.natal)).slice(0,4);
-    if(relevant.length===0) return `${label}沒有特別強烈的天象，照平常過就好，不用想太多。`;
+    const relevant=taspects.filter(a=>(planetNames.includes(a.transit)||planetNames.includes(a.natal))&&!usedAspects.has(aspectId(a))).slice(0,4);
+    if(relevant.length===0) return `${label}今天沒特別強的天象，照平常過、不用想太多。`;
     const goods=relevant.filter(a=>goodPair(a.type));
     const bads=relevant.filter(a=>badPair(a.type));
     let txt='';
     if(goods.length){
       const g=goods[0];
-      const i=aspectInterp(g.transit,g.natal,g.type);
-      txt+=`✦ <strong>今天${escapeHtml(g.transit)} ${escapeHtml(g.type)} 你本命${escapeHtml(g.natal)}</strong>${i?'　'+escapeHtml(i):''} `;
+      usedAspects.add(aspectId(g));
+      const i=aspectInterp(g.transit,g.natal,g.type)||transitInterp(g.transit,g.type);
+      txt+=`✦ <strong>今天${escapeHtml(g.transit)} ${escapeHtml(g.type)} 你本命${escapeHtml(g.natal)}</strong>${i?'　'+escapeHtml(i):''}`;
     }
     if(bads.length){
       const b=bads[0];
-      const i=aspectInterp(b.transit,b.natal,b.type);
-      txt+=`<br>⚠ <strong>今天${escapeHtml(b.transit)} ${escapeHtml(b.type)} 你本命${escapeHtml(b.natal)}</strong>${i?'　'+escapeHtml(i):'　這領域今天會有些拉扯，別硬上。'}`;
+      usedAspects.add(aspectId(b));
+      const i=aspectInterp(b.transit,b.natal,b.type)||transitInterp(b.transit,b.type);
+      txt+=`${txt?'<br>':''}⚠ <strong>今天${escapeHtml(b.transit)} ${escapeHtml(b.type)} 你本命${escapeHtml(b.natal)}</strong>${i?'　'+escapeHtml(i):''}`;
     }
-    if(!txt) txt=`${label}有幾個次要天象，沒到大事，留意就好。`;
+    if(!txt) txt=`${label}今天有幾個次要天象，沒到大事，留意就好。`;
     return txt;
   }
 
@@ -507,9 +530,9 @@ function buildTodayAdvice(transits, taspects, w){
     overall,
     love: categoryAdvice(['金星','月亮'],'感情'),
     career: categoryAdvice(['太陽','火星','土星'],'事業'),
-    wealth: categoryAdvice(['金星','木星'],'財運'),
-    health: categoryAdvice(['月亮','火星','土星'],'健康'),
-    social: categoryAdvice(['水星','金星'],'人際'),
+    wealth: categoryAdvice(['木星','冥王星'],'財運'),
+    health: categoryAdvice(['月亮','海王星'],'健康'),
+    social: categoryAdvice(['水星','木星'],'人際'),
     doList: doList.map(a=>`${a.transit} ${a.type} 本命${a.natal}`),
     avoidList: avoidList.map(a=>`${a.transit} ${a.type} 本命${a.natal}`),
     luckyHint,
