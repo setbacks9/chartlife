@@ -192,6 +192,32 @@ const ASC_SIGN={
   '射手':'別人第一眼覺得你「自由、樂觀、開放」。','摩羯':'別人第一眼覺得你「成熟、有重量感」。',
   '水瓶':'別人第一眼覺得你「特別、有距離、聰明」。','雙魚':'別人第一眼覺得你「柔軟、夢幻、難捉摸」。',
 };
+const HOUSE_THEME={
+  1:{name:'自我與外顯',body:'你給世界的第一印象、身體與外在風格、你「啟動」的方式。'},
+  2:{name:'金錢與自我價值',body:'你怎麼賺錢、怎麼花錢、什麼讓你覺得「有價值」。'},
+  3:{name:'溝通、學習、近距離',body:'日常溝通、兄弟姊妹、短期學習、近距離移動。'},
+  4:{name:'家庭與根基',body:'家、童年、安全感、內在的根。'},
+  5:{name:'創造與戀愛',body:'創造力、戀愛、小孩、玩樂、自我表達。'},
+  6:{name:'工作與健康',body:'日常工作、服務、健康、生活慣性。'},
+  7:{name:'伴侶與合作',body:'一對一關係、婚姻、合夥、公開的敵人。'},
+  8:{name:'共享資源與轉化',body:'共同財務、深層親密、生死與蛻變主題。'},
+  9:{name:'信念與遠方',body:'高等教育、長途旅行、信仰、出版、跨文化。'},
+  10:{name:'事業與社會地位',body:'事業、聲望、公眾形象、權威關係。'},
+  11:{name:'社群與願景',body:'朋友、團體、長遠願景、改革。'},
+  12:{name:'潛意識與隱藏',body:'潛意識、靈性、隱蔽的事物、自我消融。'},
+};
+const PLANET_IN_HOUSE_TIP={
+  '太陽':'核心生命能量灌注在這個領域 — 這是你「想被看見」的舞台。',
+  '月亮':'情感重心與安全感建立在這個領域。',
+  '水星':'你的注意力、思考、溝通常落在這個領域。',
+  '金星':'你的魅力、美感、愛與享受在這個領域顯化。',
+  '火星':'行動力、慾望、衝突在這個領域被激發。',
+  '木星':'好運、機會、成長空間在這個領域擴張。',
+  '土星':'壓力、責任、長期建造的考驗在這個領域。',
+  '天王星':'突發、變動、獨特性會出現在這個領域。',
+  '海王星':'夢想、模糊、靈性與幻象在這個領域。',
+  '冥王星':'深層蛻變、權力議題、強制重塑在這個領域。',
+};
 const NODE_AXIS={
   '牡羊':'今生功課：學習為自己出聲；舒適區是「為他人協調」。',
   '金牛':'今生功課：學習穩定與自我價值；舒適區是「強烈體驗」。',
@@ -397,6 +423,116 @@ function renderChartSVG(w){
   return svg;
 }
 
+function renderHouses(w){
+  const planetsByHouse={};
+  w.planets.forEach(p=>{
+    if(!planetsByHouse[p.house]) planetsByHouse[p.house]=[];
+    planetsByHouse[p.house].push(p);
+  });
+  return `<div class="glass section"><h2>⌂ 12 宮位深度解析</h2>
+    ${[1,2,3,4,5,6,7,8,9,10,11,12].map(i=>{
+      const cusp=(w.houses||[]).find(h=>h.house===i);
+      const cuspSign=cusp?SIGNS[Math.floor(cusp.lon/30)]:'';
+      const planets=planetsByHouse[i]||[];
+      return `<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(201,168,76,.1)">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px">
+          <div><strong style="color:var(--gold-light);font-size:14px">第 ${i} 宮 · ${HOUSE_THEME[i].name}</strong></div>
+          <div style="font-size:11px;opacity:.5">宮頭：${cuspSign}</div>
+        </div>
+        <div style="font-size:12px;opacity:.65;margin-top:4px;line-height:1.6">${HOUSE_THEME[i].body}</div>
+        ${planets.length?`<div style="margin-top:8px;font-size:12px">
+          <strong style="color:var(--gold-light)">這裡有：</strong>
+          ${planets.map(p=>`<div style="margin-top:4px;padding-left:8px">${PLANET_SYMBOL[p.name]||''} <strong>${escapeHtml(p.name)}</strong>${p.retrograde?' <span class="badge retro">逆</span>':''}　${PLANET_IN_HOUSE_TIP[p.name]||''}</div>`).join('')}
+        </div>`:`<div style="margin-top:6px;font-size:11px;opacity:.4">（無主要行星 — 這個領域的議題由宮頭${cuspSign}的守護星位置承擔）</div>`}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ============ 今日完整建議 ============
+const TRANSIT_PLANET_THEME={
+  '金星':{good:'感情、社交、購物、藝術活動的好時機。',bad:'感情關係容易誤會、消費需克制。'},
+  '火星':{good:'適合運動、爭取、勇敢提案。',bad:'容易衝動、爭吵、車禍 — 開車講話放慢。'},
+  '水星':{good:'適合溝通、簽約、簡訊、寫作。',bad:'容易誤解、文件出錯 — 重要訊息多檢查。'},
+  '太陽':{good:'適合展現、領導、自我推銷。',bad:'容易自我膨脹或被權威否定。'},
+  '月亮':{good:'情緒順暢、適合與家人、伴侶連結。',bad:'情緒易波動、易受外界影響。'},
+  '木星':{good:'機會、貴人、學習、出行的好日子。',bad:'容易過度承諾、過度自信。'},
+  '土星':{good:'適合處理長期計畫、整理紀律。',bad:'感到壓力、自我懷疑、卡關 — 屬必要的「結構日」。'},
+};
+
+function buildTodayAdvice(transits, taspects, w){
+  const goodPair=(t)=>['三分','六分','合相'].includes(t);
+  const badPair=(t)=>['四分','對分'].includes(t);
+  const houseCusps=(w.houses||[]).map(h=>h.lon);
+
+  // 1. 核心主題：今日太陽位置 + 月亮位置 → 整體氛圍
+  const tSun=transits['太陽'], tMoon=transits['月亮'];
+  const sunHouse=tSun&&houseCusps.length?findHouse(tSun.lon,houseCusps):null;
+  const moonHouse=tMoon&&houseCusps.length?findHouse(tMoon.lon,houseCusps):null;
+  let overall='';
+  if(tSun&&tMoon){
+    overall=`今日太陽在${tSun.sign}（你本命第 ${sunHouse} 宮）— 整體聚焦在「${HOUSE_THEME[sunHouse].name}」。月亮在${tMoon.sign}（第 ${moonHouse} 宮）— 你今日的情緒會跟「${HOUSE_THEME[moonHouse].name}」的事務同步起伏。`;
+  }
+
+  // 2. 分類：愛情 / 事業 / 財運 / 健康 / 溝通
+  function categoryAdvice(planetNames, label){
+    const relevant=taspects.filter(a=>planetNames.includes(a.transit)||planetNames.includes(a.natal)).slice(0,4);
+    if(relevant.length===0) return `今日無強烈${label}相關天象，宜照常規律。`;
+    const goods=relevant.filter(a=>goodPair(a.type));
+    const bads=relevant.filter(a=>badPair(a.type));
+    let txt='';
+    if(goods.length){
+      const g=goods[0];
+      const i=aspectInterp(g.transit,g.natal,g.type);
+      txt+=`✦ <strong>${escapeHtml(g.transit)} ${escapeHtml(g.type)} 本命${escapeHtml(g.natal)}</strong>${i?' — '+escapeHtml(i):''} `;
+    }
+    if(bads.length){
+      const b=bads[0];
+      const i=aspectInterp(b.transit,b.natal,b.type);
+      txt+=`<br>⚠ <strong>${escapeHtml(b.transit)} ${escapeHtml(b.type)} 本命${escapeHtml(b.natal)}</strong>${i?' — '+escapeHtml(i):''}`;
+    }
+    if(!txt) txt=`今日有 ${relevant.length} 個${label}相關次要相位，宜留意。`;
+    return txt;
+  }
+
+  // 3. 推薦做與避免
+  const todayActions=taspects.filter(a=>a.orb<2);
+  const doList=todayActions.filter(a=>goodPair(a.type)).slice(0,3);
+  const avoidList=todayActions.filter(a=>badPair(a.type)).slice(0,3);
+
+  // 4. 幸運時段（月亮過本命金星或木星的時段近似）
+  let luckyHint='留意月亮經過你本命金星或木星附近的時刻，那是情緒最甜的時段。';
+
+  return {
+    overall,
+    love: categoryAdvice(['金星','月亮'],'感情'),
+    career: categoryAdvice(['太陽','火星','土星'],'事業'),
+    wealth: categoryAdvice(['金星','木星'],'財運'),
+    health: categoryAdvice(['月亮','火星','土星'],'健康'),
+    social: categoryAdvice(['水星','金星'],'人際'),
+    doList: doList.map(a=>`${a.transit} ${a.type} 本命${a.natal}`),
+    avoidList: avoidList.map(a=>`${a.transit} ${a.type} 本命${a.natal}`),
+    luckyHint,
+  };
+}
+
+function renderTodayAdvice(adv){
+  return `<div class="glass section">
+    <h2>★ 今日完整占星建議</h2>
+    ${adv.overall?`<div class="interp-block"><strong>今日核心主題</strong><div style="margin-top:6px">${escapeHtml(adv.overall)}</div></div>`:''}
+    <div class="grid" style="margin-top:12px">
+      <div class="interp-block"><strong>♥ 感情</strong><div style="margin-top:6px">${adv.love}</div></div>
+      <div class="interp-block"><strong>☿ 事業</strong><div style="margin-top:6px">${adv.career}</div></div>
+      <div class="interp-block"><strong>✦ 財運</strong><div style="margin-top:6px">${adv.wealth}</div></div>
+      <div class="interp-block"><strong>☽ 健康</strong><div style="margin-top:6px">${adv.health}</div></div>
+      <div class="interp-block"><strong>♃ 人際</strong><div style="margin-top:6px">${adv.social}</div></div>
+      <div class="interp-block"><strong>☉ 幸運時段</strong><div style="margin-top:6px">${escapeHtml(adv.luckyHint)}</div></div>
+    </div>
+    ${adv.doList.length?`<div style="margin-top:14px"><div class="label">✓ 今日宜</div><ul class="advice">${adv.doList.map(t=>`<li>${escapeHtml(t)}</li>`).join('')}</ul></div>`:''}
+    ${adv.avoidList.length?`<div style="margin-top:10px"><div class="label">✗ 今日忌</div><ul class="advice">${adv.avoidList.map(t=>`<li class="warn">${escapeHtml(t)}</li>`).join('')}</ul></div>`:''}
+  </div>`;
+}
+
 function renderZiwei(zw){
   if(!zw||!zw.palaces) return '';
   const mainNames=['命宮','財帛','官祿','遷移'];
@@ -446,6 +582,7 @@ function render(data,birthLabel,target){
     }
   });
   const exactTaspects=taspects.filter(a=>a.orb<3).slice(0,6);
+  const todayAdvice=buildTodayAdvice(transits, taspects, w);
 
   const html=`<div class="report">
     <div class="report-header">
@@ -453,6 +590,8 @@ function render(data,birthLabel,target){
       <h1>✦ 星盤解讀</h1>
       <p class="date">查看日期：${escapeHtml(todayCN)}</p>
     </div>
+
+    ${renderTodayAdvice(todayAdvice)}
 
     <div class="glass section">
       <h2>☉ 你的三位一體</h2>
@@ -484,6 +623,8 @@ function render(data,birthLabel,target){
       ${nNode?`<div class="summary-row"><span class="k">北交點（今生方向）</span><span class="v">${escapeHtml(nNode.sign)}</span></div>
       <div class="interp-block">${escapeHtml(NODE_AXIS[nNode.sign]||'')}</div>`:''}
     </div>
+
+    ${renderHouses(w)}
 
     <div class="glass section">
       <h2>♄ 十大行星位置</h2>
@@ -520,18 +661,6 @@ function render(data,birthLabel,target){
           <span style="opacity:.5;font-size:11px"> · ±${a.orb.toFixed(1)}°${a.exact?' <span class="badge exact">精準</span>':''}</span>
           ${interp?`<div style="margin-top:4px">${escapeHtml(interp)}</div>`:''}</div>`;
       }).join('')}</div>`:''}
-
-    ${hd?`<div class="glass section">
-      <h2>⌬ 人類圖摘要</h2>
-      <div class="summary-row"><span class="k">類型</span><span class="v">${escapeHtml(hd.type||'-')}</span></div>
-      <div class="summary-row"><span class="k">權威</span><span class="v">${escapeHtml(hd.authority||'-')}</span></div>
-      <div class="summary-row"><span class="k">人生角色</span><span class="v">${escapeHtml(hd.profile||'-')}</span></div>
-      <div class="summary-row"><span class="k">定義</span><span class="v">${escapeHtml(hd.definition||'-')}</span></div>
-      ${hd.incarnation_cross?`<div class="summary-row"><span class="k">輪迴交叉</span><span class="v">${escapeHtml(hd.incarnation_cross)}</span></div>`:''}
-      ${hd.defined_centers?`<div style="margin-top:10px"><div class="label">已定義能量中心</div><div class="pill-row">${hd.defined_centers.map(c=>`<span class="pill">${escapeHtml(c)}</span>`).join('')}</div></div>`:''}
-    </div>`:''}
-
-    ${renderZiwei(zw)}
 
     <button class="btn secondary" id="resetBtn" style="margin-top:20px">✦ 重新查詢</button>
   </div>`;
