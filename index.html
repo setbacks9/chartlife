@@ -617,6 +617,25 @@ function render(data,birthLabel,target){
     ${renderTodayAdvice(todayAdvice)}
 
     <div class="glass section">
+      <h2>⟳ 今日天象（Transit）</h2>
+      <table><thead><tr><th>行星</th><th>今日位置</th></tr></thead>
+      <tbody>${Object.entries(transits).slice(0,7).map(([name,t])=>`<tr>
+        <td>${PLANET_SYMBOL[name]||''} ${escapeHtml(name)}${t.retrograde?'<span class="badge retro">逆</span>':''}</td>
+        <td>${escapeHtml(t.sign)} ${t.deg}°${String(t.min).padStart(2,'0')}'</td></tr>`).join('')}</tbody></table>
+      ${transitTips.length?`<div style="margin-top:12px">${transitTips.map(t=>`<div class="interp-block">${escapeHtml(t)}</div>`).join('')}</div>`:''}
+    </div>
+
+    ${exactTaspects.length?`<div class="glass section">
+      <h2>⚯ 今日天象 × 你本命 — 重要互動</h2>
+      ${exactTaspects.map(a=>{
+        const interp=aspectInterp(a.transit,a.natal,a.type)||transitInterp(a.transit,a.type);
+        return `<div class="interp-block">
+          <strong>今日${escapeHtml(a.transit)} ${escapeHtml(a.type)} 本命${escapeHtml(a.natal)}</strong>
+          <span style="opacity:.5;font-size:11px"> · ±${a.orb.toFixed(1)}°${a.exact?' <span class="badge exact">精準</span>':''}</span>
+          ${interp?`<div style="margin-top:4px">${escapeHtml(interp)}</div>`:'<div style="margin-top:4px;opacity:.5">這對天象比較細微，留意就好。</div>'}</div>`;
+      }).join('')}</div>`:''}
+
+    <div class="glass section">
       <h2>☉ 你的三位一體</h2>
       <div class="summary-row"><span class="k">太陽（核心自我）</span><span class="v">${escapeHtml(sun.sign)} ${sun.deg}°${String(sun.min).padStart(2,'0')}'</span></div>
       <div class="interp-block">${escapeHtml(SUN_SIGN[sun.sign]||'')}</div>
@@ -665,25 +684,6 @@ function render(data,birthLabel,target){
         <span style="opacity:.5;font-size:11px"> · ±${a.orb.toFixed(1)}°</span>
         <div style="margin-top:4px">${escapeHtml(a.interp)}</div></div>`).join(''):'<p style="opacity:.5">本命無強烈相位匹配字典</p>'}
     </div>
-
-    <div class="glass section">
-      <h2>⟳ 今日天象（Transit）</h2>
-      <table><thead><tr><th>行星</th><th>今日位置</th></tr></thead>
-      <tbody>${Object.entries(transits).slice(0,7).map(([name,t])=>`<tr>
-        <td>${PLANET_SYMBOL[name]||''} ${escapeHtml(name)}${t.retrograde?'<span class="badge retro">逆</span>':''}</td>
-        <td>${escapeHtml(t.sign)} ${t.deg}°${String(t.min).padStart(2,'0')}'</td></tr>`).join('')}</tbody></table>
-      ${transitTips.length?`<div style="margin-top:12px">${transitTips.map(t=>`<div class="interp-block">${escapeHtml(t)}</div>`).join('')}</div>`:''}
-    </div>
-
-    ${exactTaspects.length?`<div class="glass section">
-      <h2>⚯ 今日天象 × 你本命 — 重要互動</h2>
-      ${exactTaspects.map(a=>{
-        const interp=aspectInterp(a.transit,a.natal,a.type)||transitInterp(a.transit,a.type);
-        return `<div class="interp-block">
-          <strong>今日${escapeHtml(a.transit)} ${escapeHtml(a.type)} 本命${escapeHtml(a.natal)}</strong>
-          <span style="opacity:.5;font-size:11px"> · ±${a.orb.toFixed(1)}°${a.exact?' <span class="badge exact">精準</span>':''}</span>
-          ${interp?`<div style="margin-top:4px">${escapeHtml(interp)}</div>`:'<div style="margin-top:4px;opacity:.5">這對天象比較細微，留意就好。</div>'}</div>`;
-      }).join('')}</div>`:''}
 
     <button class="btn secondary" id="resetBtn" style="margin-top:20px">✦ 重新查詢</button>
   </div>`;
